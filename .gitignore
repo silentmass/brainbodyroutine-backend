@@ -1,0 +1,4 @@
+*.pyc
+.env
+alembic.ini
+test_conn.py
