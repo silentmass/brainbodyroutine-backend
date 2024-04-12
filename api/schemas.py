@@ -33,15 +33,15 @@ class TaskDescription(TaskDescriptionBase):
         from_attributes = True
 
 
-class TagsBase(BaseModel):
+class TagBase(BaseModel):
     title: str
 
 
-class TagsCreate(TagsBase):
+class TagCreate(TagBase):
     pass
 
 
-class Tags(TagsBase):
+class Tag(TagBase):
     id: int
 
     class Config:
@@ -50,6 +50,7 @@ class Tags(TagsBase):
 
 class TaskDescriptionListBase(BaseModel):
     title: str
+    task_id: int
 
 
 class TaskDescriptionListCreate(TaskDescriptionListBase):
@@ -68,7 +69,7 @@ class TaskBase(BaseModel):
     title: str
     is_active: bool
     task_category_id: int
-    tag_id: int
+    tag_id: int | None = None
 
 
 class TaskCreate(TaskBase):
@@ -78,7 +79,7 @@ class TaskCreate(TaskBase):
 class Task(TaskBase):
     id: int
     description_lists: list[TaskDescriptionList] | None = None
-    tags: list[Tags] | None = None
+    tags: list[Tag] | None = None
 
     class Config:
         from_attributes = True
