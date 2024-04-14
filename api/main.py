@@ -60,20 +60,11 @@ def create_task_category(
     return crud.create_task_category(db=db, task_category=task_category)
 
 
-@app.post("/api/taskcategory/{id}", response_model=schemas.TaskCategory)
-def get_task_category(id: int, db: Session = Depends(get_db)):
-    print(id)
-    db_task_category = crud.get_task_category_by_id(db=db, id=id)
-    if not db_task_category:
-        raise HTTPException(status_code=400, detail="Task category not found")
-    return db_task_category
-
-
-@app.post("/api/taskcategories/update/", response_model=schemas.TaskCategory)
+@app.post("/api/taskcategory/{id}/update", response_model=schemas.TaskCategory)
 def update_task_category(
-    task_category: schemas.TaskCategory, db: Session = Depends(get_db)
+    id: int, task_category: schemas.TaskCategory, db: Session = Depends(get_db)
 ):
-    db_task_category = crud.get_task_category_by_id(db=db, id=task_category.id)
+    db_task_category = crud.get_task_category_by_id(db=db, id=id)
     if not db_task_category:
         raise HTTPException(status_code=400, detail="Task category not found")
     return crud.update_task_category(
@@ -81,7 +72,15 @@ def update_task_category(
     )
 
 
-@app.post("/api/taskcategories/delete/{id}")
+@app.post("/api/taskcategory/{id}", response_model=schemas.TaskCategory)
+def get_task_category(id: int, db: Session = Depends(get_db)):
+    db_task_category = crud.get_task_category_by_id(db=db, id=id)
+    if not db_task_category:
+        raise HTTPException(status_code=400, detail="Task category not found")
+    return db_task_category
+
+
+@app.post("/api/taskcategory/{id}/delete")
 def delete_task_category(id: int, db: Session = Depends(get_db)):
     print(id)
     db_task_category = crud.get_task_category_by_id(db=db, id=id)
