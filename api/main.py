@@ -95,3 +95,11 @@ def read_task_categories(
 ):
     task_categories = crud.get_task_categories(db, skip=skip, limit=limit)
     return task_categories
+
+
+@app.get("/api/tasks", response_model=list[schemas.Task])
+def read_tasks(
+    skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
+):
+    tasks = crud.get_tasks(db, skip=skip, limit=limit)
+    return tasks
