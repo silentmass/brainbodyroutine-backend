@@ -44,7 +44,7 @@ def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
 
-@app.post("/api/taskcategories/", response_model=schemas.TaskCategory)
+@app.post("/api/taskcategories", response_model=schemas.TaskCategory)
 def create_task_category(
     task_category: schemas.TaskCategoryCreate, db: Session = Depends(get_db)
 ):
@@ -54,8 +54,6 @@ def create_task_category(
     if db_task_category:
         raise HTTPException(status_code=400,
                             detail="Task category already registered")
-
-    print(type(task_category.description), task_category.description)
 
     return crud.create_task_category(db=db, task_category=task_category)
 
@@ -89,7 +87,7 @@ def delete_task_category(id: int, db: Session = Depends(get_db)):
     return crud.delete_task_category(db=db, task_category=db_task_category)
 
 
-@app.get("/api/taskcategories/", response_model=list[schemas.TaskCategory])
+@app.get("/api/taskcategories", response_model=list[schemas.TaskCategory])
 def read_task_categories(
     skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 ):
@@ -101,5 +99,15 @@ def read_task_categories(
 def read_tasks(
     skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 ):
+    print("read_tasks")
     tasks = crud.get_tasks(db, skip=skip, limit=limit)
     return tasks
+
+
+@app.post("/api/tasks", response_model=schemas.TaskCreate)
+def create_task(
+  task: schemas.TaskCreate,
+  db: Session = Depends(get_db),
+):
+    print(task)
+    return crud.create_task(db, task)

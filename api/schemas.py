@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel
 
 
@@ -67,9 +69,8 @@ class TaskDescriptionList(TaskDescriptionListBase):
 
 class TaskBase(BaseModel):
     title: str
-    is_active: bool
     task_category_id: int
-    tag_id: int | None = None
+    is_active: bool
 
 
 class TaskCreate(TaskBase):
@@ -78,8 +79,8 @@ class TaskCreate(TaskBase):
 
 class Task(TaskBase):
     id: int
-    description_lists: list[TaskDescriptionList] | None = None
-    tags: list[Tag] | None = None
+    tags: List[Tag] | None = None
+    description_lists: List[TaskDescriptionList] | None = None
 
     class Config:
         from_attributes = True

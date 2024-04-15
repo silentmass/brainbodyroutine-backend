@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import Column, ForeignKey, String, Table
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
@@ -15,6 +15,16 @@ class Base(MappedAsDataclass, DeclarativeBase):
     """subclasses will be converted to dataclasses"""
 
 
+# note for a Core table, we use the sqlalchemy.Column construct,
+# not sqlalchemy.orm.mapped_column
+association_table = Table(
+    "association_table",
+    Base.metadata,
+    Column("task_id", ForeignKey("task.id")),
+    Column("tag_id", ForeignKey("tag.id")),
+)
+
+
 str50 = Annotated[str, mapped_column(String(50))]
 
 intpk = Annotated[int, mapped_column(primary_key=True)]
@@ -26,6 +36,20 @@ task_description_list_fk = Annotated[
 ]
 
 
+class Task(Base):
+    __tablename__ = "task"
+
+    id: Mapped[intpk] = mapped_column(init=False)
+    title: Mapped[str] = mapped_column(index=True)
+    task_category_id: Mapped[task_category_fk]
+    is_active: Mapped[bool] = mapped_column(default=True)
+
+    tags: Mapped[List["Tag"] | None] = relationship(
+        secondary=association_table, default_factory=list)
+    description_lists: Mapped[List["TaskDescriptionList"] | None] = (
+        relationship(default_factory=list))
+
+
 class TaskCategory(Base):
     __tablename__ = "taskcategory"
 
@@ -34,25 +58,11 @@ class TaskCategory(Base):
     description: Mapped[Optional[str]] = mapped_column(default=None)
 
 
-class TaskDescription(Base):
-    __tablename__ = "taskdescription"
-
-    id: Mapped[intpk] = mapped_column(init=False)
-    description: Mapped[str] = mapped_column(index=True)
-    description_list_id: Mapped[task_description_list_fk]
-
-    description_owner: Mapped["TaskDescriptionList"] = relationship(
-        back_populates="descriptions"
-    )
-
-
 class Tag(Base):
     __tablename__ = "tag"
 
     id: Mapped[intpk] = mapped_column(init=False)
     title: Mapped[str] = mapped_column(String(30), index=True)
-
-    tag_owner: Mapped["Task"] = relationship(back_populates="tags")
 
 
 class TaskDescriptionList(Base):
@@ -62,26 +72,12 @@ class TaskDescriptionList(Base):
     title: Mapped[str50] = mapped_column(index=True)
     task_id: Mapped[task_fk]
 
-    description_list_owner: Mapped["Task"] = relationship(
-        back_populates="description_lists"
-    )
-    descriptions: Mapped[List["TaskDescription"]] = relationship(
-        back_populates="description_owner"
-    )
+    descriptions: Mapped[List["TaskDescription"]] = relationship()
 
 
-class Task(Base):
-    __tablename__ = "task"
+class TaskDescription(Base):
+    __tablename__ = "taskdescription"
 
     id: Mapped[intpk] = mapped_column(init=False)
-    title: Mapped[str] = mapped_column(index=True)
-    task_category_id: Mapped[task_category_fk]
-    is_active: Mapped[bool] = mapped_column(default=True)
-    tag_id: Mapped[Optional[tag_fk]] = mapped_column(default=None)
-
-    description_lists: Mapped[Optional[List["TaskDescriptionList"]]] = relationship(
-        back_populates="description_list_owner", default=None
-    )
-    tags: Mapped[Optional[List["Tag"]]] = relationship(
-        back_populates="tag_owner", default=None
-    )
+    description: Mapped[str] = mapped_column(index=True)
+    description_list_id: Mapped[task_description_list_fk]
