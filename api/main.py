@@ -80,7 +80,6 @@ def get_task_category(id: int, db: Session = Depends(get_db)):
 
 @app.post("/api/taskcategory/{id}/delete")
 def delete_task_category(id: int, db: Session = Depends(get_db)):
-    print(id)
     db_task_category = crud.get_task_category_by_id(db=db, id=id)
     if not db_task_category:
         raise HTTPException(status_code=400, detail="Task category not found")
@@ -111,3 +110,11 @@ def create_task(
 ):
     print(task)
     return crud.create_task(db, task)
+
+
+@app.post("/api/tasks/{id}/delete")
+def delete_task(id: int, db: Session = Depends(get_db)):
+    db_task = crud.get_task(db=db, id=id)
+    if not db_task:
+        raise HTTPException(status_code=400, detail="Task not found")
+    return crud.delete_task(db=db, task=db_task)
