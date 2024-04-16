@@ -152,3 +152,90 @@ def update_task(
         db_task=db_task,
         task=task
     )
+
+
+# Task description list operations
+@app.get(
+    "/api/taskdescriptionlists/{task_id}",
+    response_model=list[schemas.TaskDescriptionList])
+def get_task_description_lists(
+    task_id: int,
+    db: Session = Depends(get_db)
+):
+    db_task = crud.get_task_by_id(db, task_id)
+    if not db_task:
+        raise HTTPException(
+            status_code=400,
+            detail="Task description list task not found"
+        )
+    return (
+        crud
+        .get_task_description_lists(
+            db=db,
+            task_id=task_id
+        )
+    )
+
+
+@app.post(
+    "/api/taskdescriptionlists/{task_id}",
+    response_model=schemas.TaskDescriptionListCreate)
+def create_task_description_list(
+    task_id: int,
+    description_list: schemas.TaskDescriptionListCreate,
+    db: Session = Depends(get_db),
+):
+    db_task = crud.get_task_by_id(db=db, id=task_id)
+
+    if not db_task:
+        raise HTTPException(
+            status_code=400,
+            detail="Task description list task not found"
+        )
+
+    title = description_list.title
+    db_title = (
+        crud
+        .get_task_description_list_by_title(
+            db=db, task_id=task_id, title=title
+        ))
+
+    if db_title is not None:
+        raise HTTPException(
+            status_code=400,
+            detail="Task description list already registered"
+        )
+
+    return crud.create_task_description_list(
+        db=db,
+        description_list=description_list
+    )
+
+
+@app.post(
+    "/api/taskdescriptionlists/{task_description_list_id}/delete"
+)
+def delete_task_description_list(
+    task_description_list_id: int,
+    db: Session = Depends(get_db)
+):
+    db_task_description_list = crud.get_task_description_list_by_id(
+        db=db, id=task_description_list_id
+    )
+
+    if not db_task_description_list:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Task description list"
+                + f" {task_description_list_id} not found"
+            )
+        )
+
+    return crud.delete_task_description_list(
+        db=db,
+        task_description_list=db_task_description_list
+    )
+
+
+# Task description operations

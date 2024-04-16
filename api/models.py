@@ -17,11 +17,25 @@ class Base(MappedAsDataclass, DeclarativeBase):
 
 # note for a Core table, we use the sqlalchemy.Column construct,
 # not sqlalchemy.orm.mapped_column
-association_table = Table(
-    "association_table",
+association_table_tag = Table(
+    "association_table_tag",
     Base.metadata,
     Column("task_id", ForeignKey("task.id")),
     Column("tag_id", ForeignKey("tag.id")),
+)
+
+association_table_description_list = Table(
+    "association_table_description_list",
+    Base.metadata,
+    Column("task_id", ForeignKey("task.id")),
+    Column("description_list_id", ForeignKey("taskdescriptionlist.id")),
+)
+
+association_table_description = Table(
+    "association_table_description",
+    Base.metadata,
+    Column("task_description_list_id", ForeignKey("taskdescriptionlist.id")),
+    Column("task_description_id", ForeignKey("taskdescription.id")),
 )
 
 
@@ -45,9 +59,12 @@ class Task(Base):
     is_active: Mapped[bool] = mapped_column(default=True)
 
     tags: Mapped[List["Tag"] | None] = relationship(
-        secondary=association_table, default_factory=list)
+        secondary=association_table_tag, default_factory=list)
     description_lists: Mapped[List["TaskDescriptionList"] | None] = (
-        relationship(default_factory=list))
+        relationship(
+            secondary=association_table_description_list,
+            default_factory=list)
+    )
 
 
 class TaskCategory(Base):
@@ -72,7 +89,12 @@ class TaskDescriptionList(Base):
     title: Mapped[str50] = mapped_column(index=True)
     task_id: Mapped[task_fk]
 
-    descriptions: Mapped[List["TaskDescription"]] = relationship()
+    descriptions: Mapped[List["TaskDescription"] | None] = (
+        relationship(
+            secondary=association_table_description,
+            default_factory=list
+        )
+    )
 
 
 class TaskDescription(Base):

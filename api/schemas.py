@@ -61,7 +61,7 @@ class TaskDescriptionListCreate(TaskDescriptionListBase):
 
 class TaskDescriptionList(TaskDescriptionListBase):
     id: int
-    descriptions: list[TaskDescription] | None = None
+    descriptions: List[TaskDescription] | None = None
 
     class Config:
         from_attributes = True

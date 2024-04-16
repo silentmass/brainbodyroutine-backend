@@ -92,3 +92,82 @@ def update_task(
     db_task.description_lists = task.description_lists
     db.commit()
     return db_task
+
+
+# Description list operations
+
+
+def get_task_description_lists(
+    db: Session,
+    task_id: int
+):
+    return (
+        db
+        .query(models.TaskDescriptionList)
+        .filter(models.TaskDescriptionList.task_id == task_id)
+        .all()
+    )
+
+
+def create_task_description_list(
+    db: Session,
+    description_list: schemas.TaskDescriptionListCreate
+):
+    db_description_list = models.TaskDescriptionList(
+        **description_list.model_dump()
+    )
+    db.add(db_description_list)
+    db.commit()
+    db.refresh(db_description_list)
+    return db_description_list
+
+
+def get_task_description_list_by_id(
+    db: Session,
+    id: int
+):
+    return (
+        db
+        .query(models.TaskDescriptionList)
+        .filter(models.TaskDescriptionList.id == id)
+        .first()
+    )
+
+
+def get_task_description_list_by_title(
+    db: Session,
+    task_id: int,
+    title: str
+):
+    return (
+        db
+        .query(models.TaskDescriptionList)
+        .filter(models.TaskDescriptionList.task_id == task_id
+                and models.TaskDescriptionList.title == title)
+        .first()
+    )
+
+
+def delete_task_description_list(
+    db: Session,
+    task_description_list: schemas.TaskDescriptionList
+):
+    db.delete(task_description_list)
+    db.commit()
+    return True
+
+
+# Description operations
+
+
+def create_task_description(
+    db: Session,
+    description: schemas.TaskDescriptionCreate
+):
+    db_description = models.TaskDescription(
+        **description.model_dump()
+    )
+    db.add(db_description)
+    db.commit()
+    db.refresh()
+    return db_description
