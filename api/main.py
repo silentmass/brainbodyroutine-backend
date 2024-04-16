@@ -239,3 +239,33 @@ def delete_task_description_list(
 
 
 # Task description operations
+
+
+@app.get(
+    "/api/tasksdescriptionlists/{task_description_list_id}/descriptions",
+    response_model=list[schemas.TaskDescription]
+)
+def get_list_descriptions(
+    task_description_list_id: int,
+    db: Session = Depends(get_db)
+):
+    db_list = crud.get_task_description_list_by_id(
+        db=db,
+        id=task_description_list_id
+    )
+
+    if not db_list:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Description list {task_description_list_id}"
+                + " not registered")
+        )
+
+    return (
+        crud
+        .get_task_description_list_descriptions(
+            db=db,
+            description_list_id=task_description_list_id
+        )
+    )

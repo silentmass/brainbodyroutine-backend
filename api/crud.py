@@ -116,6 +116,7 @@ def create_task_description_list(
     db_description_list = models.TaskDescriptionList(
         **description_list.model_dump()
     )
+    print(db_description_list)
     db.add(db_description_list)
     db.commit()
     db.refresh(db_description_list)
@@ -142,8 +143,8 @@ def get_task_description_list_by_title(
     return (
         db
         .query(models.TaskDescriptionList)
-        .filter(models.TaskDescriptionList.task_id == task_id
-                and models.TaskDescriptionList.title == title)
+        .filter(models.TaskDescriptionList.task_id == task_id,
+                models.TaskDescriptionList.title == title)
         .first()
     )
 
@@ -160,7 +161,22 @@ def delete_task_description_list(
 # Description operations
 
 
-def create_task_description(
+def get_task_description_list_descriptions(
+    db: Session,
+    description_list_id: int
+):
+    return (
+        db
+        .query(models.TaskDescription)
+        .filter(
+            (models.TaskDescription.description_list_id
+             == description_list_id)
+        )
+        .all()
+    )
+
+
+def create_task_list_description(
     db: Session,
     description: schemas.TaskDescriptionCreate
 ):
