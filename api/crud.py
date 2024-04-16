@@ -2,6 +2,8 @@ from sqlalchemy.orm import Session
 
 from . import models, schemas
 
+# Task category operations
+
 
 def get_task_category_by_title(db: Session, task_category_title: str):
     return (
@@ -51,8 +53,10 @@ def delete_task_category(db: Session, task_category: schemas.TaskCategory):
     db.commit()
     return True
 
+# Task operations
 
-def get_task(db: Session, id: int):
+
+def get_task_by_id(db: Session, id: int):
     return db.query(models.Task).filter(models.Task.id == id).first()
 
 
@@ -74,3 +78,17 @@ def delete_task(db: Session, task: schemas.Task):
     db.delete(task)
     db.commit()
     return True
+
+
+def update_task(
+    db: Session,
+    db_task: schemas.Task,
+    task: schemas.Task,
+):
+    db_task.title = task.title
+    db_task.task_category_id = task.task_category_id
+    db_task.is_active = task.is_active
+    db_task.tags = task.tags
+    db_task.description_lists = task.description_lists
+    db.commit()
+    return db_task

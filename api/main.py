@@ -93,12 +93,13 @@ def read_task_categories(
     task_categories = crud.get_task_categories(db, skip=skip, limit=limit)
     return task_categories
 
+# Task operations
+
 
 @app.get("/api/tasks", response_model=list[schemas.Task])
 def read_tasks(
     skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 ):
-    print("read_tasks")
     tasks = crud.get_tasks(db, skip=skip, limit=limit)
     return tasks
 
@@ -108,13 +109,46 @@ def create_task(
   task: schemas.TaskCreate,
   db: Session = Depends(get_db),
 ):
-    print(task)
     return crud.create_task(db, task)
 
 
 @app.post("/api/tasks/{id}/delete")
 def delete_task(id: int, db: Session = Depends(get_db)):
-    db_task = crud.get_task(db=db, id=id)
+    db_task = crud.get_task_by_id(db=db, id=id)
     if not db_task:
         raise HTTPException(status_code=400, detail="Task not found")
     return crud.delete_task(db=db, task=db_task)
+
+
+@app.post("/api/tasks/{id}", response_model=schemas.Task)
+def get_task(id: int, db: Session = Depends(get_db)):
+    db_task = crud.get_task_by_id(db=db, id=id)
+
+    if not db_task:
+        raise HTTPException("Task not found")
+
+    return db_task
+
+
+@app.post("/api/tasks/{id}/update", response_model=schemas.Task)
+def update_task(
+    id: int,
+    task: schemas.Task,
+    db: Session = Depends(get_db)
+):
+    db_task = crud.get_task_by_id(db=db, id=id)
+
+    if not db_task:
+        raise HTTPException("Task not found")
+
+    if not task.tags:
+        task.tags = []
+
+    if not task.description_lists:
+        task.description_lists = []
+
+    return crud.update_task(
+        db=db,
+        db_task=db_task,
+        task=task
+    )
