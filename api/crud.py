@@ -176,6 +176,18 @@ def get_task_description_list_descriptions(
     )
 
 
+def get_list_description_by_id(
+    db: Session,
+    id: int
+):
+    return (
+        db
+        .query(models.TaskDescription)
+        .filter(models.TaskDescription.id == id)
+        .first()
+    )
+
+
 def create_task_list_description(
     db: Session,
     description: schemas.TaskDescriptionCreate
@@ -185,5 +197,14 @@ def create_task_list_description(
     )
     db.add(db_description)
     db.commit()
-    db.refresh()
+    db.refresh(db_description)
     return db_description
+
+
+def delete_list_description(
+  db: Session,
+  description: schemas.TaskDescription
+):
+    db.delete(description)
+    db.commit()
+    return True
