@@ -142,10 +142,10 @@ def update_task(
         raise HTTPException("Task not found")
 
     if not task.tags:
-        task.tags = []
+        task.tags = db_task.tags
 
     if not task.description_lists:
-        task.description_lists = []
+        task.description_lists = db_task.description_lists
 
     return crud.update_task(
         db=db,
@@ -158,7 +158,7 @@ def update_task(
 @app.get(
     "/api/taskdescriptionlists/{task_id}",
     response_model=list[schemas.TaskDescriptionList])
-def get_task_description_lists(
+def get_description_lists(
     task_id: int,
     db: Session = Depends(get_db)
 ):
@@ -171,30 +171,24 @@ def get_task_description_lists(
 
     description_lists = (
         crud
-        .get_task_description_lists(
+        .get_description_lists(
             db=db,
             task_id=task_id
         )
     )
 
-    for idx, description_list in enumerate(description_lists):
-        descriptions = crud.get_task_description_list_descriptions(
-            db=db, description_list_id=description_list.id
-        )
-        description_lists[idx].descriptions = descriptions
-
     return description_lists
 
 
 @app.post(
-    "/api/taskdescriptionlists/{task_id}",
+    "/api/tasks/{id}/descriptionlists",
     response_model=schemas.TaskDescriptionListCreate)
-def create_task_description_list(
-    task_id: int,
+def create_description_list(
+    id: int,
     description_list: schemas.TaskDescriptionListCreate,
     db: Session = Depends(get_db),
 ):
-    db_task = crud.get_task_by_id(db=db, id=task_id)
+    db_task = crud.get_task_by_id(db=db, id=id)
 
     if not db_task:
         raise HTTPException(
@@ -205,8 +199,8 @@ def create_task_description_list(
     title = description_list.title
     db_title = (
         crud
-        .get_task_description_list_by_title(
-            db=db, task_id=task_id, title=title
+        .get_description_list_by_title(
+            db=db, task_id=id, title=title
         ))
 
     if db_title is not None:
@@ -215,21 +209,44 @@ def create_task_description_list(
             detail="Task description list already registered"
         )
 
-    return crud.create_task_description_list(
+    return crud.create_description_list(
         db=db,
         description_list=description_list
     )
 
 
 @app.post(
-    "/api/taskdescriptionlists/{task_description_list_id}/delete"
+    "/api/descriptionlists/{id}/update",
+    response_model=schemas.TaskDescriptionList
 )
-def delete_task_description_list(
-    task_description_list_id: int,
+def update_description_list(
+    id: int,
+    descriptionList: schemas.TaskDescriptionList,
     db: Session = Depends(get_db)
 ):
-    db_task_description_list = crud.get_task_description_list_by_id(
-        db=db, id=task_description_list_id
+    print(descriptionList)
+    db_list = crud.get_description_list_by_id(db, id)
+
+    if (descriptionList.descriptions is None
+            or not descriptionList.descriptions):
+        descriptionList.descriptions = []
+
+    if not db_list:
+        raise HTTPException(status_code=400,
+                            detail="Description list is not registered")
+
+    return crud.update_description_list(db, db_list, descriptionList)
+
+
+@app.post(
+    "/api/descriptionlists/{id}/delete"
+)
+def delete_description_list(
+    id: int,
+    db: Session = Depends(get_db)
+):
+    db_task_description_list = crud.get_description_list_by_id(
+        db=db, id=id
     )
 
     if not db_task_description_list:
@@ -237,11 +254,11 @@ def delete_task_description_list(
             status_code=400,
             detail=(
                 "Task description list"
-                + f" {task_description_list_id} not found"
+                + f" {id} not found"
             )
         )
 
-    return crud.delete_task_description_list(
+    return crud.delete_description_list(
         db=db,
         task_description_list=db_task_description_list
     )
@@ -255,7 +272,7 @@ def get_description_list(
   id: int,
   db: Session = Depends(get_db)
 ):
-    db_list = crud.get_task_description_list_by_id(db, id)
+    db_list = crud.get_description_list_by_id(db, id)
 
     if not db_list:
         raise HTTPException(
@@ -266,7 +283,7 @@ def get_description_list(
     return db_list
 
 
-# Task description operations
+# List description operations
 
 
 @app.get(
@@ -277,7 +294,7 @@ def get_list_descriptions(
     id: int,
     db: Session = Depends(get_db)
 ):
-    db_list = crud.get_task_description_list_by_id(
+    db_list = crud.get_description_list_by_id(
         db=db,
         id=id
     )
@@ -291,7 +308,7 @@ def get_list_descriptions(
 
     return (
         crud
-        .get_task_description_list_descriptions(
+        .get_list_descriptions(
             db=db,
             description_list_id=id
         )
@@ -307,12 +324,29 @@ def create_list_description(
     description: schemas.TaskDescriptionCreate,
     db: Session = Depends(get_db)
 ):
-    db_list = crud.get_task_description_list_by_id(db, id)
+    db_list = crud.get_description_list_by_id(db, id)
 
     if not db_list:
         raise HTTPException(f"Description list {id} not registered")
 
-    return (crud.create_task_list_description(db, description=description))
+    return (crud.create_list_description(db, description=description))
+
+
+@app.post(
+    "/api/descriptions/{id}/update",
+    response_model=schemas.TaskDescriptionList
+)
+def update_list_description(
+    description: schemas.TaskDescriptionList,
+    db: Session = Depends(get_db)
+):
+    db_description = crud.get_list_description_by_id(db, description.id)
+
+    if not description:
+        raise HTTPException(
+            status_code=400, detail="Description is not registered")
+
+    return crud.update_list_description(db, db_description, description)
 
 
 @app.post(

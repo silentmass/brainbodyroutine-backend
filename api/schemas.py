@@ -37,6 +37,7 @@ class TaskDescription(TaskDescriptionBase):
 
 class TagBase(BaseModel):
     title: str
+    task_id: int
 
 
 class TagCreate(TagBase):

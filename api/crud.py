@@ -74,12 +74,6 @@ def create_task(db: Session, task: schemas.TaskCreate):
     return db_task
 
 
-def delete_task(db: Session, task: schemas.Task):
-    db.delete(task)
-    db.commit()
-    return True
-
-
 def update_task(
     db: Session,
     db_task: schemas.Task,
@@ -94,10 +88,16 @@ def update_task(
     return db_task
 
 
+def delete_task(db: Session, task: schemas.Task):
+    db.delete(task)
+    db.commit()
+    return True
+
+
 # Description list operations
 
 
-def get_task_description_lists(
+def get_description_lists(
     db: Session,
     task_id: int
 ):
@@ -109,7 +109,7 @@ def get_task_description_lists(
     )
 
 
-def create_task_description_list(
+def create_description_list(
     db: Session,
     description_list: schemas.TaskDescriptionListCreate
 ):
@@ -123,7 +123,7 @@ def create_task_description_list(
     return db_description_list
 
 
-def get_task_description_list_by_id(
+def get_description_list_by_id(
     db: Session,
     id: int
 ):
@@ -135,7 +135,7 @@ def get_task_description_list_by_id(
     )
 
 
-def get_task_description_list_by_title(
+def get_description_list_by_title(
     db: Session,
     task_id: int,
     title: str
@@ -149,7 +149,27 @@ def get_task_description_list_by_title(
     )
 
 
-def delete_task_description_list(
+def update_description_list(
+    db: Session,
+    db_list: schemas.TaskDescriptionList,
+    new_list: schemas.TaskDescriptionList
+):
+    updated_list = schemas.TaskDescriptionList(
+        id=db_list.id,
+        task_id=db_list.task_id,
+        title=new_list.title,
+        descriptions=(
+            new_list.descriptions
+            if new_list.descriptions
+            else db_list.descriptions
+        )
+    )
+    db.add(updated_list)
+    db.commit()
+    return updated_list
+
+
+def delete_description_list(
     db: Session,
     task_description_list: schemas.TaskDescriptionList
 ):
@@ -158,10 +178,10 @@ def delete_task_description_list(
     return True
 
 
-# Description operations
+# List description operations
 
 
-def get_task_description_list_descriptions(
+def get_list_descriptions(
     db: Session,
     description_list_id: int
 ):
@@ -188,7 +208,7 @@ def get_list_description_by_id(
     )
 
 
-def create_task_list_description(
+def create_list_description(
     db: Session,
     description: schemas.TaskDescriptionCreate
 ):
@@ -198,6 +218,17 @@ def create_task_list_description(
     db.add(db_description)
     db.commit()
     db.refresh(db_description)
+    return db_description
+
+
+def update_list_description(
+    db: Session,
+    db_description: schemas.TaskDescription,
+    description: schemas.TaskDescription
+):
+    db_description.description = description.description
+    db_description.description_list_id = description.description_list_id
+    db.commit()
     return db_description
 
 
