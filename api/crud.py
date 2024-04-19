@@ -154,19 +154,13 @@ def update_description_list(
     db_list: schemas.TaskDescriptionList,
     new_list: schemas.TaskDescriptionList
 ):
-    updated_list = schemas.TaskDescriptionList(
-        id=db_list.id,
-        task_id=db_list.task_id,
-        title=new_list.title,
-        descriptions=(
-            new_list.descriptions
-            if new_list.descriptions
-            else db_list.descriptions
-        )
-    )
-    db.add(updated_list)
+    db_list.title = new_list.title
+    # db_list.descriptions = []
+    # for description in new_list.descriptions:
+    #     print(description)
+    #     db_list.descriptions.append(description)
     db.commit()
-    return updated_list
+    return db_list
 
 
 def delete_description_list(

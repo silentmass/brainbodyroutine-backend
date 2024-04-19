@@ -224,16 +224,14 @@ def update_description_list(
     descriptionList: schemas.TaskDescriptionList,
     db: Session = Depends(get_db)
 ):
-    print(descriptionList)
     db_list = crud.get_description_list_by_id(db, id)
-
-    if (descriptionList.descriptions is None
-            or not descriptionList.descriptions):
-        descriptionList.descriptions = []
 
     if not db_list:
         raise HTTPException(status_code=400,
                             detail="Description list is not registered")
+
+    if descriptionList.descriptions is None:
+        descriptionList.descriptions = db_list.descriptions
 
     return crud.update_description_list(db, db_list, descriptionList)
 
@@ -334,10 +332,10 @@ def create_list_description(
 
 @app.post(
     "/api/descriptions/{id}/update",
-    response_model=schemas.TaskDescriptionList
+    response_model=schemas.TaskDescription
 )
 def update_list_description(
-    description: schemas.TaskDescriptionList,
+    description: schemas.TaskDescription,
     db: Session = Depends(get_db)
 ):
     db_description = crud.get_list_description_by_id(db, description.id)
