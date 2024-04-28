@@ -2,3 +2,4 @@
 .env
 alembic.ini
 test_conn.py
+.env.development.local
