@@ -1,5 +1,6 @@
 from typing import Union
 
+import uvicorn
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -360,3 +361,7 @@ def delete_list_description(
         raise HTTPException("List description not registered")
 
     return crud.delete_list_description(db, db_description)
+
+
+if __name__ == "__main__":
+    uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=True)

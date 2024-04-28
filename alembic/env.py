@@ -1,7 +1,8 @@
+import os
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from dotenv import load_dotenv
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 
@@ -76,3 +77,11 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
+
+# Assuming your .env file is in the same directory as your alembic directory
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env.development.local'))
+
+# Now you can use environment variables, e.g.,
+config.set_main_option('sqlalchemy.url', os.environ['POSTGRES_URL'])
+
+# The rest of your env.py code follows...
