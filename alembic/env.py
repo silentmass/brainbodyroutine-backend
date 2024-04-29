@@ -73,11 +73,6 @@ def run_migrations_online() -> None:
             context.run_migrations()
 
 
-if context.is_offline_mode():
-    run_migrations_offline()
-else:
-    run_migrations_online()
-
 # Assuming your .env file is in the same directory as your alembic directory
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env.development.local'))
 
@@ -85,3 +80,8 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '.env.development.local'))
 config.set_main_option('sqlalchemy.url', os.environ['POSTGRES_URL'])
 
 # The rest of your env.py code follows...
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()
