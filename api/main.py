@@ -35,6 +35,11 @@ def get_db():
         db.close()
 
 
+@app.get("/")
+async def root():
+    return {"message": "Hello from FastAPI!"}
+
+
 @app.get("/api/hello")
 def read_root():
     return {"Hello": "World"}
