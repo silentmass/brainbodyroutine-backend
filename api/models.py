@@ -38,12 +38,12 @@ class Task(Base):
     task_category_id: Mapped[task_category_fk]
     is_active: Mapped[bool] = mapped_column(default=True)
 
-    tags: Mapped[List["Tag"] | None] = relationship(
+    tags: Mapped[Optional[List["Tag"]]] = relationship(
         argument="Tag",
         default_factory=list,
         cascade="all, delete"
     )
-    description_lists: Mapped[List["TaskDescriptionList"] | None] = (
+    description_lists: Mapped[Optional[List["TaskDescriptionList"]]] = (
         relationship(
             argument="TaskDescriptionList",
             default_factory=list,
@@ -75,7 +75,7 @@ class TaskDescriptionList(Base):
     title: Mapped[str50] = mapped_column(index=True)
     task_id: Mapped[task_fk]
 
-    descriptions: Mapped[List["TaskDescription"] | None] = (
+    descriptions: Mapped[Optional[List["TaskDescription"]]] = (
         relationship(
             argument="TaskDescription",
             default_factory=list,

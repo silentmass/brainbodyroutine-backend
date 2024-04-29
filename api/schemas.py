@@ -1,11 +1,11 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
 
 class TaskCategoryBase(BaseModel):
     title: str
-    description: str | None = None
+    description: Optional[str] = None
 
 
 class TaskCategoryCreate(TaskCategoryBase):
@@ -62,7 +62,7 @@ class TaskDescriptionListCreate(TaskDescriptionListBase):
 
 class TaskDescriptionList(TaskDescriptionListBase):
     id: int
-    descriptions: List[TaskDescription] | None = None
+    descriptions: Optional[List[TaskDescription]] = None
 
     class Config:
         from_attributes = True
@@ -80,8 +80,8 @@ class TaskCreate(TaskBase):
 
 class Task(TaskBase):
     id: int
-    tags: List[Tag] | None = None
-    description_lists: List[TaskDescriptionList] | None = None
+    tags: Optional[List[Tag]] = None
+    description_lists: Optional[List[TaskDescriptionList]] = None
 
     class Config:
         from_attributes = True
