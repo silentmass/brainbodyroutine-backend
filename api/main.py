@@ -51,7 +51,7 @@ def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
 
-@app.post("/api/taskcategories", response_model=schemas.TaskCategory)
+@app.post("/api/taskcategories", response_model=schemas.TaskCategoryCreate)
 def create_task_category(
     task_category: schemas.TaskCategoryCreate, db: Session = Depends(get_db)
 ):
