@@ -55,6 +55,7 @@ def read_item(item_id: int, q: Union[str, None] = None):
 def create_task_category(
     task_category: schemas.TaskCategoryCreate, db: Session = Depends(get_db)
 ):
+    print("create_task_category", task_category)
     db_task_category = crud.get_task_category_by_title(
         db, task_category_title=task_category.title
     )
