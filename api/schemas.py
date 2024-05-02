@@ -1,6 +1,44 @@
+from datetime import timedelta
 from typing import List, Optional
 
 from pydantic import BaseModel
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenWithExpiresAt(Token):
+    expires: timedelta
+
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+
+class SignInRequest(BaseModel):
+    username: str
+    password: str
+
+
+class User(BaseModel):
+    username: str
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    disabled: Optional[bool] = None
+
+
+class UserInDB(User):
+    hashed_password: str
+
+
+class UserNextAuth(UserInDB):
+    id: int
+
+
+class UserCreate(User):
+    password: str
 
 
 class TaskCategoryBase(BaseModel):

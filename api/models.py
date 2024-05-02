@@ -30,6 +30,17 @@ task_description_list_fk = Annotated[
 ]
 
 
+class User(Base):
+    __tablename__ = "user"
+    id: Mapped[intpk] = mapped_column(init=False)
+    username: Mapped[str] = mapped_column(
+        index=True, unique=True, nullable=False)
+    email: Mapped[Optional[str]] = mapped_column(unique=True, nullable=True)
+    full_name: Mapped[Optional[str]] = mapped_column(index=True, nullable=True)
+    disabled: Mapped[Optional[bool]] = mapped_column(nullable=True)
+    hashed_password: Mapped[str] = mapped_column(nullable=False)
+
+
 class Task(Base):
     __tablename__ = "task"
 

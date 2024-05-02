@@ -1,16 +1,177 @@
-from typing import Union
+import os
+from datetime import datetime, timedelta, timezone
+from typing import Annotated, Optional, Union
 
 import uvicorn
-from fastapi import Depends, FastAPI, HTTPException
+from dotenv import load_dotenv
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import JWTError, jwt
+from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from . import crud, models, schemas
 from .database import SessionLocal, engine
+from .schemas import Token, TokenData, User
+
+load_dotenv(".env")
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
+
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token")
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+def verify_passwords(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+
+@app.post("/api/user", response_model=schemas.UserNextAuth)
+def get_user(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: Session = Depends(get_db)
+):
+    user = authenticate_user(
+        form_data.username, form_data.password, db=db)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if user:
+        return user
+
+
+@app.get("/users", response_model=list[schemas.User])
+def get_all_users(db: Session = Depends(get_db)):
+    users = crud.get_users(db)
+    return users
+
+
+@app.post("/api/user/create")
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    print("Create user")
+    db_user = crud.get_user(db, username=user.username)
+    if db_user:
+        raise HTTPException(status_code=400, detail="User already registered")
+
+    return crud.create_user(db, user=user)
+
+
+def authenticate_user(
+    username: str, password: str, db: Session = Depends(get_db)
+):
+    user = crud.get_user(username=username, db=db)
+    if not user:
+        return False
+    if not verify_passwords(password, user.hashed_password):
+        return False
+    return user
+
+
+def create_access_token(data: dict, expired_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expired_delta:
+        expire = datetime.now(timezone.utc) + expired_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
+async def get_current_user(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    db: Session = Depends(get_db)
+):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = crud.get_user(username=token_data.username, db=db)
+    if user is None:
+        raise credentials_exception
+    return user
+
+
+async def get_current_active_user(
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    if current_user.disabled:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+
+# @app.post("/token")
+@app.post("/api/token", response_model=Token)
+async def login_for_access_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: Session = Depends(get_db)
+) -> Token:
+    # Change db here and in arguments !!!
+    user = authenticate_user(
+        form_data.username, form_data.password, db=db)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expired_delta=access_token_expires
+    )
+    return Token(
+        access_token=access_token,
+        token_type="bearer",
+    )
+
+
+@app.get("/api/users/me", response_model=User)
+async def read_user_me(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    return current_user
+
+
+@app.get("/api/users/me/items")
+async def read_own_items(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    return [{"item_id": "Foo", "owner": current_user.username}]
+
 
 origins = [
     "http://127.0.0.1:3000",
@@ -25,15 +186,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @app.get("/")
@@ -115,6 +267,7 @@ def read_tasks(
 @app.post("/api/tasks", response_model=schemas.TaskCreate)
 def create_task(
   task: schemas.TaskCreate,
+  current_user: Annotated[User, Depends(get_current_active_user)],
   db: Session = Depends(get_db),
 ):
     return crud.create_task(db, task)
@@ -371,4 +524,7 @@ def delete_list_description(
 
 
 if __name__ == "__main__":
-    uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("api.main:app",
+                host=os.getenv("API_HOST"),
+                port=os.getenv("API_PORT"),
+                reload=True)
