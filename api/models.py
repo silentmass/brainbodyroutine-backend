@@ -34,7 +34,8 @@ class User(Base):
     __tablename__ = "user"
     id: Mapped[intpk] = mapped_column(init=False)
     username: Mapped[str] = mapped_column(
-        index=True, unique=True, nullable=False)
+        index=True, unique=True, nullable=False
+    )
     email: Mapped[Optional[str]] = mapped_column(unique=True, nullable=True)
     full_name: Mapped[Optional[str]] = mapped_column(index=True, nullable=True)
     disabled: Mapped[Optional[bool]] = mapped_column(nullable=True)
@@ -50,15 +51,13 @@ class Task(Base):
     is_active: Mapped[bool] = mapped_column(default=True)
 
     tags: Mapped[Optional[List["Tag"]]] = relationship(
-        argument="Tag",
-        default_factory=list,
-        cascade="all, delete"
+        argument="Tag", default_factory=list, cascade="all, delete"
     )
     description_lists: Mapped[Optional[List["TaskDescriptionList"]]] = (
         relationship(
             argument="TaskDescriptionList",
             default_factory=list,
-            cascade="all, delete"
+            cascade="all, delete",
         )
     )
 
@@ -86,12 +85,8 @@ class TaskDescriptionList(Base):
     title: Mapped[str50] = mapped_column(index=True)
     task_id: Mapped[task_fk]
 
-    descriptions: Mapped[Optional[List["TaskDescription"]]] = (
-        relationship(
-            argument="TaskDescription",
-            default_factory=list,
-            cascade="all, delete"
-        )
+    descriptions: Mapped[Optional[List["TaskDescription"]]] = relationship(
+        argument="TaskDescription", default_factory=list, cascade="all, delete"
     )
 
 
