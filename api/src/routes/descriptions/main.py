@@ -1,6 +1,8 @@
+from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from api.src.routes.auth.controller import get_current_active_user
 from api.src.routes.descriptionlists.controller import (
     get_description_list_by_id,
 )
@@ -15,6 +17,7 @@ from api.src.routes.descriptions.schemas import (
     TaskDescription,
     TaskDescriptionCreate,
 )
+from api.src.routes.users.schemas import User
 from api.src.routes.utils.db_dependency import get_db
 from api.src.routes.descriptionlists.main import router_lists
 
@@ -48,6 +51,7 @@ def get_list_descriptions_ep(id: int, db: Session = Depends(get_db)):
 def create_list_description_ep(
     id: int,
     description: TaskDescriptionCreate,
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Session = Depends(get_db),
 ):
     db_list = get_description_list_by_id(db, id)
@@ -60,7 +64,9 @@ def create_list_description_ep(
 
 @router_descriptions.post("/{id}/update", response_model=TaskDescription)
 def update_list_description_ep(
-    description: TaskDescription, db: Session = Depends(get_db)
+    description: TaskDescription,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Session = Depends(get_db),
 ):
     db_description = get_list_description_by_id(db, description.id)
 
@@ -76,7 +82,9 @@ def update_list_description_ep(
     "/{description_id}/delete",
 )
 def delete_list_description_ep(
-    description_id: int, db: Session = Depends(get_db)
+    description_id: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Session = Depends(get_db),
 ):
     db_description = get_list_description_by_id(db, description_id)
 

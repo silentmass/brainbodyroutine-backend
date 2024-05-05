@@ -1,5 +1,7 @@
+from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from api.src.routes.auth.controller import get_current_active_user
 from api.src.routes.descriptionlists.controller import (
     create_description_list,
     delete_description_list,
@@ -13,6 +15,7 @@ from api.src.routes.descriptionlists.schemas import (
     TaskDescriptionListCreate,
 )
 from api.src.routes.tasks.controller import get_task_by_id
+from api.src.routes.users.schemas import User
 from api.src.routes.utils.db_dependency import get_db
 from api.src.routes.tasks.main import router_tasks
 
@@ -24,24 +27,34 @@ router_lists = APIRouter(
 # Task description list operations
 
 
-@router_lists.get(
-    "/{task_id}/descriptionlists",
+@router_tasks.get(
+    "/{id}/descriptionlists",
     response_model=list[TaskDescriptionList],
 )
 def get_description_lists_by_task_id_ep(
-    task_id: int, db: Session = Depends(get_db)
+    id: int, db: Session = Depends(get_db)
 ):
-    db_task = get_task_by_id(db, task_id)
+    db_task = get_task_by_id(db, id)
     if not db_task:
         raise HTTPException(
             status_code=400, detail="Task description list task not found"
         )
 
-    description_lists = get_description_lists_by_task_id(
-        db=db, task_id=task_id
-    )
+    description_lists = get_description_lists_by_task_id(db=db, task_id=id)
 
     return description_lists
+
+
+@router_lists.get("/{id}", response_model=TaskDescriptionList)
+def get_description_list_by_id_ep(id: int, db: Session = Depends(get_db)):
+    db_list = get_description_list_by_id(db, id)
+
+    if not db_list:
+        raise HTTPException(
+            status_code=400, detail=f"Description list {id} not registered"
+        )
+
+    return db_list
 
 
 @router_tasks.post(
@@ -51,6 +64,7 @@ def get_description_lists_by_task_id_ep(
 def create_description_list_ep(
     id: int,
     description_list: TaskDescriptionListCreate,
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Session = Depends(get_db),
 ):
     db_task = get_task_by_id(db=db, id=id)
@@ -80,6 +94,7 @@ def create_description_list_ep(
 def update_description_list_ep(
     id: int,
     descriptionList: TaskDescriptionList,
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Session = Depends(get_db),
 ):
     db_list = get_description_list_by_id(db, id)
@@ -96,7 +111,11 @@ def update_description_list_ep(
 
 
 @router_lists.post("/{id}/delete")
-def delete_description_list_ep(id: int, db: Session = Depends(get_db)):
+def delete_description_list_ep(
+    id: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Session = Depends(get_db),
+):
     db_task_description_list = get_description_list_by_id(db=db, id=id)
 
     if not db_task_description_list:
@@ -108,15 +127,3 @@ def delete_description_list_ep(id: int, db: Session = Depends(get_db)):
     return delete_description_list(
         db=db, task_description_list=db_task_description_list
     )
-
-
-@router_lists.get("/{id}", response_model=TaskDescriptionList)
-def get_description_list_by_id_ep(id: int, db: Session = Depends(get_db)):
-    db_list = get_description_list_by_id(db, id)
-
-    if not db_list:
-        raise HTTPException(
-            status_code=400, detail=f"Description list {id} not registered"
-        )
-
-    return db_list

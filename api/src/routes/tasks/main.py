@@ -32,23 +32,6 @@ def get_tasks_ep(
     return tasks
 
 
-@router_tasks.post("", response_model=TaskCreate)
-def create_task_ep(
-    task: TaskCreate,
-    current_user: Annotated[User, Depends(get_current_active_user)],
-    db: Session = Depends(get_db),
-):
-    return create_task(db, task)
-
-
-@router_tasks.post("/{id}/delete")
-def delete_task_ep(id: int, db: Session = Depends(get_db)):
-    db_task = get_task_by_id(db=db, id=id)
-    if not db_task:
-        raise HTTPException(status_code=400, detail="Task not found")
-    return delete_task(db=db, task=db_task)
-
-
 @router_tasks.post("/{id}", response_model=Task)
 def get_task_by_id_ep(id: int, db: Session = Depends(get_db)):
     db_task = get_task_by_id(db=db, id=id)
@@ -59,8 +42,34 @@ def get_task_by_id_ep(id: int, db: Session = Depends(get_db)):
     return db_task
 
 
+@router_tasks.post("", response_model=TaskCreate)
+def create_task_ep(
+    task: TaskCreate,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Session = Depends(get_db),
+):
+    return create_task(db, task)
+
+
+@router_tasks.post("/{id}/delete")
+def delete_task_ep(
+    id: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Session = Depends(get_db),
+):
+    db_task = get_task_by_id(db=db, id=id)
+    if not db_task:
+        raise HTTPException(status_code=400, detail="Task not found")
+    return delete_task(db=db, task=db_task)
+
+
 @router_tasks.post("/{id}/update", response_model=Task)
-def update_task_ep(id: int, task: Task, db: Session = Depends(get_db)):
+def update_task_ep(
+    id: int,
+    task: Task,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Session = Depends(get_db),
+):
     db_task = get_task_by_id(db=db, id=id)
 
     if not db_task:

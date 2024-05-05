@@ -1,6 +1,8 @@
 from fastapi import APIRouter
 
-from api.src.routes.auth.controller import authenticate_user
+from api.src.routes.auth.controller import (
+    authenticate_user,
+)
 from api.src.routes.users.controller import (
     create_user,
     get_user_by_username,
@@ -45,7 +47,10 @@ def get_all_users_ep(db: Session = Depends(get_db)):
 
 
 @router_users.post("/create")
-def create_user_ep(user: UserCreate, db: Session = Depends(get_db)):
+def create_user_ep(
+    user: UserCreate,
+    db: Session = Depends(get_db),
+):
     print("Create user")
     db_user = get_user_by_username(db, username=user.username)
     if db_user:
