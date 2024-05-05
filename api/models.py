@@ -22,6 +22,10 @@ class Base(MappedAsDataclass, DeclarativeBase):
 str50 = Annotated[str, mapped_column(String(50))]
 
 intpk = Annotated[int, mapped_column(primary_key=True)]
+user_fk = Annotated[
+    int,
+    mapped_column(ForeignKey("user.id"), index=True, nullable=True),
+]
 task_fk = Annotated[int, mapped_column(ForeignKey("task.id"))]
 tag_fk = Annotated[int, mapped_column(ForeignKey("tag.id"))]
 task_category_fk = Annotated[int, mapped_column(ForeignKey("taskcategory.id"))]
@@ -38,8 +42,15 @@ class User(Base):
     )
     email: Mapped[Optional[str]] = mapped_column(unique=True, nullable=True)
     full_name: Mapped[Optional[str]] = mapped_column(index=True, nullable=True)
-    disabled: Mapped[Optional[bool]] = mapped_column(nullable=True)
     hashed_password: Mapped[str] = mapped_column(nullable=False)
+    disabled: Mapped[Optional[bool]] = mapped_column(
+        nullable=True, default=False
+    )
+    tasks: Mapped[Optional[List["Task"]]] = relationship(
+        argument="Task",
+        default_factory=list,
+        cascade="all, delete",
+    )
 
 
 class Task(Base):
@@ -49,6 +60,10 @@ class Task(Base):
     title: Mapped[str] = mapped_column(index=True)
     task_category_id: Mapped[task_category_fk]
     is_active: Mapped[bool] = mapped_column(default=True)
+    user_id: Mapped[user_fk] = mapped_column(default=None)
+    sort_order: Mapped[int] = mapped_column(
+        default=None, index=True, nullable=True
+    )
 
     tags: Mapped[Optional[List["Tag"]]] = relationship(
         argument="Tag", default_factory=list, cascade="all, delete"

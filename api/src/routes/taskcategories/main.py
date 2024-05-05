@@ -46,7 +46,6 @@ def create_task_category_ep(
     current_user: Annotated[User, Depends(get_current_active_user)],
     db: Session = Depends(get_db),
 ):
-    print("create_task_category", task_category)
     db_task_category = get_task_category_by_title(
         db, task_category_title=task_category.title
     )
