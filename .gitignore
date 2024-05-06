@@ -9,8 +9,8 @@ backend/seed_data/task_categories.json
 backend/seed_data/tasks.json
 backend/seed_data/users.json
 venv/
-*.egg
-*.egg-info
+# *.egg
+# *.egg-info
 __pycache__/
 backend/seed_data
 backend/seed_dataa
