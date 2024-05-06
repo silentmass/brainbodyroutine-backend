@@ -53,14 +53,14 @@ app.include_router(taskcategories_main.router_categories)
 app.include_router(tasks_main.router_tasks)
 
 
-# Redirect / -> Swagger-UI documentation
 @app.get("/")
-def main_function():
-    """
-    # Redirect
-    to documentation (`/docs/`).
-    """
-    return RedirectResponse(url="/docs/")
+async def root():
+    return {"message": "Hello from FastAPI!"}
+
+
+@app.get("/api/hello")
+def read_root():
+    return {"Hello": "World"}
 
 
 # Swagger expects the auth-URL to be /token, but in our case it is /auth/token
@@ -91,16 +91,6 @@ async def read_own_items(
     return [{"item_id": "Foo", "owner": current_user.username}]
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello from FastAPI!"}
-
-
-@app.get("/api/hello")
-def read_root():
-    return {"Hello": "World"}
-
-
 @app.get("/api/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
@@ -108,7 +98,7 @@ def read_item(item_id: int, q: Union[str, None] = None):
 
 if __name__ == "__main__":
     uvicorn.run(
-        "api.main:app",
+        "backend.api.main:app",
         host=os.getenv("API_HOST"),
         port=os.getenv("API_PORT"),
         reload=True,
