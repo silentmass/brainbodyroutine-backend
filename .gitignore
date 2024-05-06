@@ -8,3 +8,6 @@ test_conn.py
 api/seed_from_json.py
 api/task_categories.json
 api/users.json
+seed_data/task_categories.json
+seed_data/tasks.json
+seed_data/users.json

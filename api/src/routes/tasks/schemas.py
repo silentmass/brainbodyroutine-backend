@@ -9,14 +9,13 @@ class TaskBase(BaseModel):
     title: str
     task_category_id: int
     is_active: bool
-    user_id: Optional[int] = None
 
 
 class TaskCreate(TaskBase):
-    pass
+    user_id: Optional[int] = None
 
 
-class Task(TaskBase):
+class Task(TaskCreate):
     id: int
     sort_order: Optional[int] = None
     tags: Optional[List[Tag]] = None

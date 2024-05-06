@@ -6,14 +6,14 @@ from sqlalchemy.orm import Session
 from api.src.routes.auth.controller import get_current_active_user
 from api.src.routes.tasks.controller import (
     copy_task_for_user,
-    create_task,
+    create_user_task,
     delete_task,
     get_task_by_id,
     get_tasks,
     get_user_tasks,
     update_task,
 )
-from api.src.routes.tasks.schemas import Task, TaskCreate
+from api.src.routes.tasks.schemas import Task, TaskBase, TaskCreate
 from api.src.routes.users.schemas import User
 from api.src.routes.utils.db_dependency import get_db
 
@@ -36,11 +36,11 @@ def get_tasks_ep(
 
 @router_tasks.post("", response_model=TaskCreate)
 def create_task_ep(
-    task: TaskCreate,
+    task: TaskBase,
     current_user: Annotated[User, Depends(get_current_active_user)],
     db: Session = Depends(get_db),
 ):
-    return create_task(db, task)
+    return create_user_task(db, task, current_user)
 
 
 @router_tasks.post("/user-tasks/copy", response_model=Task)
@@ -69,7 +69,7 @@ def delete_user_task_ep(
     db: Session = Depends(get_db),
 ):
     db_task = get_task_by_id(db=db, id=id)
-    if not db_task | db_task.user_id != current_user.id:
+    if not db_task or db_task.user_id != current_user.id:
         raise HTTPException(status_code=400, detail="User task not found")
     return delete_task(db=db, task=db_task)
 
@@ -82,18 +82,6 @@ def get_task_by_id_ep(id: int, db: Session = Depends(get_db)):
         raise HTTPException("Task not found")
 
     return db_task
-
-
-@router_tasks.post("/{id}/delete")
-def delete_task_ep(
-    id: int,
-    current_user: Annotated[User, Depends(get_current_active_user)],
-    db: Session = Depends(get_db),
-):
-    db_task = get_task_by_id(db=db, id=id)
-    if not db_task:
-        raise HTTPException(status_code=400, detail="Task not found")
-    return delete_task(db=db, task=db_task)
 
 
 @router_tasks.post("/{id}/update", response_model=Task)

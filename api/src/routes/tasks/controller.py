@@ -7,7 +7,7 @@ from api.src.routes.descriptions.controller import create_list_description
 from api.src.routes.descriptions.schemas import TaskDescriptionCreate
 from api.src.routes.users.schemas import User
 
-from .schemas import Task, TaskCreate
+from .schemas import Task, TaskBase, TaskCreate
 from api import models
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -20,21 +20,28 @@ def get_task_by_id(db: Session, id: int):
 
 
 def get_tasks(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Task).offset(skip).limit(limit).all()
+    return (
+        db.query(models.Task)
+        .order_by(models.Task.sort_order)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 def get_user_tasks(db: Session, user: User, skip: int = 0, limit: int = 100):
     return (
         db.query(models.Task)
+        .filter(models.Task.user_id == user.id)
+        .order_by(models.Task.sort_order)
         .offset(skip)
         .limit(limit)
-        .filter(models.Task.user_id == user.id)
         .all()
     )
 
 
-def create_task(db: Session, task: TaskCreate):
-    db_task = models.Task(**task.model_dump())
+def create_user_task(db: Session, task: TaskBase, user: User):
+    db_task = models.Task(**task.model_dump(), user_id=user.id)
     db.add(db_task)
     db.commit()
     db.refresh(db_task)
@@ -54,7 +61,7 @@ def create_task(db: Session, task: TaskCreate):
 
 
 def copy_task_for_user(db: Session, task: Task, user: User):
-    db_new_task = create_task(
+    db_new_task = create_user_task(
         db,
         TaskCreate(
             title=task.title,
