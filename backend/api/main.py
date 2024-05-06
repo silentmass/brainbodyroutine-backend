@@ -1,4 +1,3 @@
-import os
 from typing import Annotated, Union
 
 from fastapi.responses import RedirectResponse
@@ -97,9 +96,4 @@ def read_item(item_id: int, q: Union[str, None] = None):
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "backend.api.main:app",
-        host=os.getenv("API_HOST"),
-        port=os.getenv("API_PORT"),
-        reload=True,
-    )
+    uvicorn.run(app)
