@@ -1,0 +1,17 @@
+[
+  {
+    "title": "Wordle",
+    "task_category_id": 1,
+    "is_active": true
+  },
+  {
+    "title": "Climb stairs",
+    "task_category_id": 2,
+    "is_active": true
+  },
+  {
+    "title": "Eat fruits",
+    "task_category_id": 6,
+    "is_active": true
+  }
+]

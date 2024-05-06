@@ -11,3 +11,7 @@ api/users.json
 seed_data/task_categories.json
 seed_data/tasks.json
 seed_data/users.json
+venv/
+*.egg
+*.egg-info
+__pycache__/
