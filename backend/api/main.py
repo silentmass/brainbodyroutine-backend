@@ -1,6 +1,7 @@
 from typing import Annotated, Union
 
 from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,6 +30,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token")
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+# Mount the static directory, 'static' at the root level
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 origins = [
     "http://127.0.0.1:3000",
