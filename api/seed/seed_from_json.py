@@ -26,7 +26,7 @@ def seed_user_from_json(filepath):
     for user in data:
         db_user = get_user_by_username(db, user["username"])
         if db_user is None:
-            new_user = create_user(
+            create_user(
                 db,
                 UserCreate(
                     username=user["username"],

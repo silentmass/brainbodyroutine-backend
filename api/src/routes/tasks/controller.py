@@ -16,13 +16,13 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def get_task_by_id(db: Session, id: int):
-    return db.query(models.Task).filter(models.Task.id == id).first()
+    return db.query(models.BBR_Task).filter(models.BBR_Task.id == id).first()
 
 
 def get_tasks(db: Session, skip: int = 0, limit: int = 100):
     return (
-        db.query(models.Task)
-        .order_by(models.Task.sort_order)
+        db.query(models.BBR_Task)
+        .order_by(models.BBR_Task.sort_order)
         .offset(skip)
         .limit(limit)
         .all()
@@ -31,9 +31,9 @@ def get_tasks(db: Session, skip: int = 0, limit: int = 100):
 
 def get_user_tasks(db: Session, user: User, skip: int = 0, limit: int = 100):
     return (
-        db.query(models.Task)
-        .filter(models.Task.user_id == user.id)
-        .order_by(models.Task.sort_order)
+        db.query(models.BBR_Task)
+        .filter(models.BBR_Task.user_id == user.id)
+        .order_by(models.BBR_Task.sort_order)
         .offset(skip)
         .limit(limit)
         .all()
@@ -41,7 +41,7 @@ def get_user_tasks(db: Session, user: User, skip: int = 0, limit: int = 100):
 
 
 def create_user_task(db: Session, task: TaskBase, user: User):
-    db_task = models.Task(**task.model_dump(), user_id=user.id)
+    db_task = models.BBR_Task(**task.model_dump(), user_id=user.id)
     db.add(db_task)
     db.commit()
     db.refresh(db_task)

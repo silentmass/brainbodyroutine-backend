@@ -12,8 +12,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def get_description_lists_by_task_id(db: Session, task_id: int):
     return (
-        db.query(models.TaskDescriptionList)
-        .filter(models.TaskDescriptionList.task_id == task_id)
+        db.query(models.BBR_TaskDescriptionList)
+        .filter(models.BBR_TaskDescriptionList.task_id == task_id)
         .all()
     )
 
@@ -21,7 +21,7 @@ def get_description_lists_by_task_id(db: Session, task_id: int):
 def create_description_list(
     db: Session, description_list: schemas.TaskDescriptionListCreate
 ):
-    db_description_list = models.TaskDescriptionList(
+    db_description_list = models.BBR_TaskDescriptionList(
         **description_list.model_dump()
     )
     print(db_description_list)
@@ -33,18 +33,18 @@ def create_description_list(
 
 def get_description_list_by_id(db: Session, id: int):
     return (
-        db.query(models.TaskDescriptionList)
-        .filter(models.TaskDescriptionList.id == id)
+        db.query(models.BBR_TaskDescriptionList)
+        .filter(models.BBR_TaskDescriptionList.id == id)
         .first()
     )
 
 
 def get_task_description_list_by_title(db: Session, task_id: int, title: str):
     return (
-        db.query(models.TaskDescriptionList)
+        db.query(models.BBR_TaskDescriptionList)
         .filter(
-            models.TaskDescriptionList.task_id == task_id,
-            models.TaskDescriptionList.title == title,
+            models.BBR_TaskDescriptionList.task_id == task_id,
+            models.BBR_TaskDescriptionList.title == title,
         )
         .first()
     )

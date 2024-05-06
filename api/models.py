@@ -24,18 +24,20 @@ str50 = Annotated[str, mapped_column(String(50))]
 intpk = Annotated[int, mapped_column(primary_key=True)]
 user_fk = Annotated[
     int,
-    mapped_column(ForeignKey("user.id"), index=True, nullable=True),
+    mapped_column(ForeignKey("BBR_users.id"), index=True, nullable=True),
 ]
-task_fk = Annotated[int, mapped_column(ForeignKey("task.id"))]
-tag_fk = Annotated[int, mapped_column(ForeignKey("tag.id"))]
-task_category_fk = Annotated[int, mapped_column(ForeignKey("taskcategory.id"))]
+task_fk = Annotated[int, mapped_column(ForeignKey("BBR_tasks.id"))]
+tag_fk = Annotated[int, mapped_column(ForeignKey("BBR_tags.id"))]
+task_category_fk = Annotated[
+    int, mapped_column(ForeignKey("BBR_taskcategories.id"))
+]
 task_description_list_fk = Annotated[
-    int, mapped_column(ForeignKey("taskdescriptionlist.id"))
+    int, mapped_column(ForeignKey("BBR_taskdescriptionlists.id"))
 ]
 
 
-class User(Base):
-    __tablename__ = "user"
+class BBR_User(Base):
+    __tablename__ = "BBR_users"
     id: Mapped[intpk] = mapped_column(init=False)
     username: Mapped[str] = mapped_column(
         index=True, unique=True, nullable=False
@@ -46,15 +48,15 @@ class User(Base):
     disabled: Mapped[Optional[bool]] = mapped_column(
         nullable=True, default=False
     )
-    tasks: Mapped[Optional[List["Task"]]] = relationship(
-        argument="Task",
+    tasks: Mapped[Optional[List["BBR_Task"]]] = relationship(
+        argument="BBR_Task",
         default_factory=list,
         cascade="all, delete",
     )
 
 
-class Task(Base):
-    __tablename__ = "task"
+class BBR_Task(Base):
+    __tablename__ = "BBR_tasks"
 
     id: Mapped[intpk] = mapped_column(init=False)
     title: Mapped[str] = mapped_column(index=True)
@@ -65,48 +67,50 @@ class Task(Base):
         default=None, index=True, nullable=True
     )
 
-    tags: Mapped[Optional[List["Tag"]]] = relationship(
-        argument="Tag", default_factory=list, cascade="all, delete"
+    tags: Mapped[Optional[List["BBR_Tag"]]] = relationship(
+        argument="BBR_Tag", default_factory=list, cascade="all, delete"
     )
-    description_lists: Mapped[Optional[List["TaskDescriptionList"]]] = (
+    description_lists: Mapped[Optional[List["BBR_TaskDescriptionList"]]] = (
         relationship(
-            argument="TaskDescriptionList",
+            argument="BBR_TaskDescriptionList",
             default_factory=list,
             cascade="all, delete",
         )
     )
 
 
-class TaskCategory(Base):
-    __tablename__ = "taskcategory"
+class BBR_TaskCategory(Base):
+    __tablename__ = "BBR_taskcategories"
 
     id: Mapped[intpk] = mapped_column(init=False)
     title: Mapped[str] = mapped_column(String(30), index=True)
     description: Mapped[Optional[str]] = mapped_column(default=None)
 
 
-class Tag(Base):
-    __tablename__ = "tag"
+class BBR_Tag(Base):
+    __tablename__ = "BBR_tags"
 
     id: Mapped[intpk] = mapped_column(init=False)
     title: Mapped[str] = mapped_column(String(30), index=True)
     task_id: Mapped[task_fk]
 
 
-class TaskDescriptionList(Base):
-    __tablename__ = "taskdescriptionlist"
+class BBR_TaskDescriptionList(Base):
+    __tablename__ = "BBR_taskdescriptionlists"
 
     id: Mapped[intpk] = mapped_column(init=False)
     title: Mapped[str50] = mapped_column(index=True)
     task_id: Mapped[task_fk]
 
-    descriptions: Mapped[Optional[List["TaskDescription"]]] = relationship(
-        argument="TaskDescription", default_factory=list, cascade="all, delete"
+    descriptions: Mapped[Optional[List["BBR_TaskDescription"]]] = relationship(
+        argument="BBR_TaskDescription",
+        default_factory=list,
+        cascade="all, delete",
     )
 
 
-class TaskDescription(Base):
-    __tablename__ = "taskdescription"
+class BBR_TaskDescription(Base):
+    __tablename__ = "BBR_taskdescriptions"
 
     id: Mapped[intpk] = mapped_column(init=False)
     description: Mapped[str] = mapped_column(index=True)

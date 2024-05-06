@@ -13,9 +13,12 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def get_list_descriptions(db: Session, description_list_id: int):
     return (
-        db.query(models.TaskDescription)
+        db.query(models.BBR_TaskDescription)
         .filter(
-            (models.TaskDescription.description_list_id == description_list_id)
+            (
+                models.BBR_TaskDescription.description_list_id
+                == description_list_id
+            )
         )
         .all()
     )
@@ -23,8 +26,8 @@ def get_list_descriptions(db: Session, description_list_id: int):
 
 def get_list_description_by_id(db: Session, id: int):
     return (
-        db.query(models.TaskDescription)
-        .filter(models.TaskDescription.id == id)
+        db.query(models.BBR_TaskDescription)
+        .filter(models.BBR_TaskDescription.id == id)
         .first()
     )
 
@@ -32,7 +35,7 @@ def get_list_description_by_id(db: Session, id: int):
 def create_list_description(
     db: Session, description: schemas.TaskDescriptionCreate
 ):
-    db_description = models.TaskDescription(**description.model_dump())
+    db_description = models.BBR_TaskDescription(**description.model_dump())
     db.add(db_description)
     db.commit()
     db.refresh(db_description)
