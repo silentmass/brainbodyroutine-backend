@@ -54,8 +54,15 @@ app.include_router(users_main.router_users)
 app.include_router(taskcategories_main.router_categories)
 app.include_router(tasks_main.router_tasks)
 
+favicon_path = "backend/static/favicon.ico"
 
-@app.get("/")
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse(favicon_path)
+
+
+@app.get("/api")
 async def root():
     return {"message": "Hello from FastAPI!"}
 
@@ -63,14 +70,6 @@ async def root():
 @app.get("/api/hello")
 def read_root():
     return {"Hello": "World"}
-
-
-favicon_path = "/static/favicon.ico"
-
-
-@app.get("/favicon.ico", include_in_schema=False)
-async def favicon():
-    return FileResponse(favicon_path)
 
 
 # Swagger expects the auth-URL to be /token, but in our case it is /auth/token
