@@ -13,3 +13,4 @@ venv/
 *.egg-info
 __pycache__/
 backend/seed_data
+backend/seed_dataa
