@@ -1,25 +1,22 @@
-from typing import Annotated, Union
-
 from fastapi.responses import FileResponse, RedirectResponse
 import uvicorn
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 
-from .src.routes.auth import main as auth_main
-from .src.routes.descriptions import main as descriptions_main
-from .src.routes.users import main as users_main
-from .src.routes.descriptionlists import main as descriptionlists_main
-from .src.routes.taskcategories import main as taskcategories_main
-from .src.routes.tasks import main as tasks_main
+from backend.api.src.routes.auth import main as auth_main
+from backend.api.src.routes.descriptions import main as descriptions_main
+from backend.api.src.routes.users import main as users_main
+from backend.api.src.routes.descriptionlists import (
+    main as descriptionlists_main,
+)
+from backend.api.src.routes.taskcategories import main as taskcategories_main
+from backend.api.src.routes.tasks import main as tasks_main
 
-from .src.routes.auth.controller import get_current_active_user
-from .src.routes.users.schemas import User
+from backend.api.src.config.database import engine
 
-from .src.config.database import engine
-
-from .models import Base
+from backend.api.models import Base
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -29,9 +26,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token")
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
-# Mount the static directory, 'static' at the root level
-
 
 origins = [
     "http://127.0.0.1:3000",
@@ -81,28 +75,6 @@ def forward_to_login():
     to token-generation (`/auth/token`). Used to make Auth in Swagger-UI work.
     """
     return RedirectResponse(url="/api/authorize/token")
-
-
-# Test endpoints
-
-
-@app.get("/api/users/me", response_model=User)
-async def read_user_me(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-):
-    return current_user
-
-
-@app.get("/api/users/me/items")
-async def read_own_items(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-):
-    return [{"item_id": "Foo", "owner": current_user.username}]
-
-
-@app.get("/api/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
 
 
 if __name__ == "__main__":
