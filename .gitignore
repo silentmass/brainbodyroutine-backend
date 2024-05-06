@@ -5,13 +5,11 @@ test_conn.py
 .env.development.local
 .env.development
 .env.production
-api/seed_from_json.py
-api/task_categories.json
-api/users.json
-seed_data/task_categories.json
-seed_data/tasks.json
-seed_data/users.json
+backend/seed_data/task_categories.json
+backend/seed_data/tasks.json
+backend/seed_data/users.json
 venv/
 *.egg
 *.egg-info
 __pycache__/
+backend/seed_data
