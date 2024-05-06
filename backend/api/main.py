@@ -30,7 +30,7 @@ app = FastAPI()
 origins = [
     "http://127.0.0.1:3000",
     "127.0.0.1:3000",
-    "https://brainbodyroutine2-gwz0l946r-juha-leukkunens-projects.vercel.app/",
+    # "https://brainbodyroutine2-gwz0l946r-juha-leukkunens-projects.vercel.app/",
 ]
 
 app.add_middleware(
