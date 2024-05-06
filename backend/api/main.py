@@ -51,13 +51,18 @@ app.include_router(tasks_main.router_tasks)
 favicon_path = "backend/static/favicon.ico"
 
 
+@app.get("")
+def main_root():
+    return {"message": "Hello from FastAPI main_root!"}
+
+
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
     return FileResponse(favicon_path)
 
 
 @app.get("/api")
-async def root():
+def root():
     return {"message": "Hello from FastAPI!"}
 
 
