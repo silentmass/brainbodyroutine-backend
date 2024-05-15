@@ -1,4 +1,5 @@
 from passlib.context import CryptContext
+from sqlalchemy import null
 from sqlalchemy.orm import Session
 
 from backend.api.src.routes.descriptionlists.controller import (
@@ -28,6 +29,17 @@ def get_task_by_id(db: Session, id: int):
 def get_tasks(db: Session, skip: int = 0, limit: int = 100):
     return (
         db.query(models.BBR_Task)
+        .order_by(models.BBR_Task.sort_order)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+
+def get_null_user_tasks(db: Session, skip: int = 0, limit: int = 100):
+    return (
+        db.query(models.BBR_Task)
+        .filter(models.BBR_Task.user_id.is_(None))
         .order_by(models.BBR_Task.sort_order)
         .offset(skip)
         .limit(limit)

@@ -8,8 +8,8 @@ from backend.api.src.routes.tasks.controller import (
     copy_task_for_user,
     create_user_task,
     delete_task,
+    get_null_user_tasks,
     get_task_by_id,
-    get_tasks,
     get_user_tasks,
     update_task,
 )
@@ -27,10 +27,10 @@ router_tasks = APIRouter(
 
 
 @router_tasks.get("", response_model=list[Task])
-def get_tasks_ep(
+def get_null_user_tasks_ep(
     skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 ):
-    tasks = get_tasks(db, skip=skip, limit=limit)
+    tasks = get_null_user_tasks(db, skip=skip, limit=limit)
     return tasks
 
 

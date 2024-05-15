@@ -51,7 +51,6 @@ def create_user_ep(
     user: UserCreate,
     db: Session = Depends(get_db),
 ):
-    print("Create user")
     db_user = get_user_by_username(db, username=user.username)
     if db_user:
         raise HTTPException(status_code=400, detail="User already registered")
