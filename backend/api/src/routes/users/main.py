@@ -2,9 +2,11 @@ from fastapi import APIRouter
 
 from backend.api.src.routes.auth.controller import (
     authenticate_user,
+    get_current_active_user,
 )
 from backend.api.src.routes.users.controller import (
     create_user,
+    delete_user,
     get_user_by_username,
     get_users,
 )
@@ -56,3 +58,11 @@ def create_user_ep(
         raise HTTPException(status_code=400, detail="User already registered")
 
     return create_user(db, user=user)
+
+
+@router_users.post("/delete")
+def delete_user_ep(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Session = Depends(get_db),
+):
+    return delete_user(db=db, user=current_user)

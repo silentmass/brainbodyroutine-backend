@@ -13,7 +13,7 @@ from backend.api.src.routes.descriptions.controller import (
 from backend.api.src.routes.descriptions.schemas import TaskDescriptionCreate
 from backend.api.src.routes.users.schemas import User
 
-from .schemas import Task, TaskBase, TaskCreate
+from .schemas import Task, TaskBase
 from backend.api import models
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
