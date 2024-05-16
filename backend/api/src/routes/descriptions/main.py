@@ -17,6 +17,7 @@ from backend.api.src.routes.descriptions.schemas import (
     TaskDescription,
     TaskDescriptionCreate,
 )
+from backend.api.src.routes.tasks.controller import get_task_by_id
 from backend.api.src.routes.users.schemas import User
 from backend.api.src.routes.utils.db_dependency import get_db
 from backend.api.src.routes.descriptionlists.main import router_lists
@@ -30,16 +31,45 @@ router_descriptions = APIRouter(
 
 
 @router_lists.get(
-    "/{id}/descriptions",
+    "/{id}/descriptions/user",
     response_model=list[TaskDescription],
 )
-def get_list_descriptions_ep(id: int, db: Session = Depends(get_db)):
+def get_user_list_descriptions_ep(
+    id: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Session = Depends(get_db),
+):
     db_list = get_description_list_by_id(db=db, id=id)
 
     if not db_list:
         raise HTTPException(
             status_code=400, detail=(f"Description list {id} not registered")
         )
+
+    db_task = get_task_by_id(db, db_list.task_id)
+
+    if not db_task or db_task.user_id != current_user.id:
+        raise HTTPException(status_code=400, detail="Task not exist for user")
+
+    return get_list_descriptions(db=db, description_list_id=id)
+
+
+@router_lists.get(
+    "/{id}/descriptions/nulluser",
+    response_model=list[TaskDescription],
+)
+def get_null_user_list_descriptions_ep(id: int, db: Session = Depends(get_db)):
+    db_list = get_description_list_by_id(db=db, id=id)
+
+    if not db_list:
+        raise HTTPException(
+            status_code=400, detail=(f"Description list {id} not registered")
+        )
+
+    db_task = get_task_by_id(db, db_list.task_id)
+
+    if not db_task or not db_task.user_id.is_(None):
+        raise HTTPException("List tasks user not null or task not exist")
 
     return get_list_descriptions(db=db, description_list_id=id)
 

@@ -1,5 +1,4 @@
 from passlib.context import CryptContext
-from sqlalchemy import null
 from sqlalchemy.orm import Session
 
 from backend.api.src.routes.descriptionlists.controller import (
@@ -81,12 +80,12 @@ def create_user_task(db: Session, task: TaskBase, user: User):
 def copy_task_for_user(db: Session, task: Task, user: User):
     db_new_task = create_user_task(
         db,
-        TaskCreate(
+        TaskBase(
             title=task.title,
             task_category_id=task.task_category_id,
             is_active=task.is_active,
-            user_id=user.id,
         ),
+        user,
     )
 
     # Update tags
