@@ -78,6 +78,7 @@ def create_user_task(db: Session, task: TaskBase, user: User):
 
 
 def copy_task_for_user(db: Session, task: Task, user: User):
+    print("Starting task duplication for user:", user.id)
     db_new_task = create_user_task(
         db,
         TaskBase(
@@ -87,6 +88,7 @@ def copy_task_for_user(db: Session, task: Task, user: User):
         ),
         user,
     )
+    print("New task created with id:", db_new_task.id)
 
     # Update tags
     update_task(
@@ -103,22 +105,30 @@ def copy_task_for_user(db: Session, task: Task, user: User):
             description_lists=db_new_task.description_lists,
         ),
     )
+    print("Task updated successfully with id:", db_new_task.id)
 
     # Create descriptions
     for description_list in task.description_lists:
         # Create new list
+        print("Creating new description list for task:", db_new_task.id)
         db_list = TaskDescriptionListCreate(
             title=description_list.title, task_id=db_new_task.task_id
         )
         new_db_list = create_description_list(db, db_list)
+        print("New description list created with id:", new_db_list.id)
 
         for description in description_list:
             # Create new description
+            print("Creating new description for list:", new_db_list.id)
             db_description = TaskDescriptionCreate(
                 description=description.description,
                 description_list_id=new_db_list.description_list_id,
             )
             create_list_description(db, db_description)
+            print("New description created with id:", db_description.id)
+
+    db.commit()
+    print("Task duplication completed successfully for user:", user.id)
 
     return get_task_by_id(db, db_new_task.id)
 
