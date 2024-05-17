@@ -57,7 +57,9 @@ def copy_task_for_user_ep(
     if db_task.user_id is not None:
         raise HTTPException(status_code=400, detail="Task user not None")
 
-    return copy_task_for_user(db, db_task, current_user)
+    db_copied_task = copy_task_for_user(db, db_task, current_user)
+
+    return db_copied_task
 
 
 @router_tasks.get("/user-tasks", response_model=list[Task])
