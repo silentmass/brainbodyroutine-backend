@@ -13,6 +13,8 @@ from backend.api.src.routes.descriptionlists import (
 )
 from backend.api.src.routes.taskcategories import main as taskcategories_main
 from backend.api.src.routes.tasks import main as tasks_main
+from backend.api.src.routes.aws import main as aws_main
+from backend.api.src.routes.croq import main as croq_main
 
 from backend.api.src.config.database import engine
 
@@ -47,6 +49,8 @@ app.include_router(descriptions_main.router_descriptions)
 app.include_router(users_main.router_users)
 app.include_router(taskcategories_main.router_categories)
 app.include_router(tasks_main.router_tasks)
+app.include_router(aws_main.router_aws)
+app.include_router(croq_main.router_croq)
 
 favicon_path = "backend/static/favicon.ico"
 
